@@ -10,14 +10,14 @@ module FaradayMiddleware
         if env[:url].query.nil?
           query = {}
         else
-          query = Faraday::Utils.parse_query(env[:url].query)
+          query = Faraday::Utils.default_params_encoder.decode(env[:url].query)
         end
 
         if @access_token and not query["client_secret"]
-          env[:url].query = Faraday::Utils.build_query(query.merge(:access_token => @access_token))
+          env[:url].query = Faraday::Utils.default_params_encoder.encode(query.merge(:access_token => @access_token))
           env[:request_headers] = env[:request_headers].merge('Authorization' => "Token token=\"#{@access_token}\"")
         elsif @client_id
-          env[:url].query = Faraday::Utils.build_query(query.merge(:client_id => @client_id))
+          env[:url].query = Faraday::Utils.default_params_encoder.encode(query.merge(:client_id => @client_id))
         end
       else
         if @access_token and not env[:body] && env[:body][:client_secret]
